@@ -20,4 +20,4 @@ Group Members:
 | 5 | 7-Segment Display and Interrupt Subroutine | We are asked to implement even-counter and odd-counter using 7-segment display and for our program to be able to change counting mode when a button is pressed using interrupt subroutines. |
 | 6 | Playing with Time                          | We are asked to implement a timer with start-stop and save best time features using interrupt subroutines and 7-segment display. |
 | 7 | LCD Display                                | We are asked to write sliding text into 16x2 LCD text display. |
-| 8 | Random Number Generation                   | We are asked to implement several random number generator functions and to display numbers on LCD and save them in RAM. |
+| 8 | Random Number Generation                   | We are asked to implement several random number generator functions and to display generated numbers on LCD and save them in RAM. |
