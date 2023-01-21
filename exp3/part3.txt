@@ -1,0 +1,101 @@
+; GROUP11 WEDNESDAY
+;-------------------------------------------------------------------------------
+; MSP430 Assembler Code Template for use with TI Code Composer Studio
+;
+;
+;-------------------------------------------------------------------------------
+            .cdecls C,LIST,"msp430.h"       ; Include device header file
+            
+;-------------------------------------------------------------------------------
+            .def    RESET                   ; Export program entry-point to
+                                            ; make it known to linker.
+;-------------------------------------------------------------------------------
+            .data
+a			.word	0
+b			.word	29
+c			.word	0000
+d			.word	0000
+HALF		.word 	0
+hash		.space 	58
+STNUM1		.word	40
+STNUM2		.word	190
+STNUM3		.word	218
+STNUM4		.word	150
+STNUM5		.word	210
+STNUM6		.word	710
+STNUM7		.word	150
+STNUM8		.word	180
+STNUM9		.word	736
+STNUM10		.word	150
+STNUM11		.word	190
+STNUM12		.word	99
+            .text                           ; Assemble into program memory.
+            .retain                         ; Override ELF conditional linking
+                                            ; and retain current section.
+            .retainrefs                     ; And retain any sections that have
+                                            ; references to current section.
+
+;-------------------------------------------------------------------------------
+RESET       mov.w   #__STACK_END,SP         ; Initialize stackpointer
+StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL  ; Stop watchdog timer
+			mov.w	#0d, P2SEL
+
+
+;-------------------------------------------------------------------------------
+; Main loop here
+;-------------------------------------------------------------------------------
+		mov.w	#hash, R10
+		mov.w	#STNUM1, R5
+
+opt		mov.w 	0(R5), a
+		jmp 	MOD
+
+MODX	mov.w	d, R11
+		rla.w	R11
+		add.w  	R10,R11
+		bit.w 	#0FFFFh, 0(R11)
+		jz		STEP1
+		inc.w	d
+		mov.w 	d, a
+		jmp 	MOD
+STEP1	mov.w	d, R11
+		rla.w	R11
+		add.w  	R10,R11
+		mov.w	0(R5), 0(R11)
+
+loop	inc.w 	R5
+		inc.w	R5
+		jmp 	opt
+
+MOD		mov.w  	#a, R15
+		mov.w	b,c
+		mov.w 	a,d
+		mov.w	a, HALF
+		rra.w	HALF
+Main	cmp.w	c, HALF
+		jge 	MULT
+BACK2	cmp.w	b, d
+		jge 	SUBS
+		jmp		MODX
+MULT	rla.w	c
+		jmp		Main
+SUBS	cmp.w	c,d
+		jge 	SUBTR
+BACK1	rra.w	c
+		jmp 	BACK2
+SUBTR	sub.w	c, d
+		jmp 	BACK1
+
+
+;-------------------------------------------------------------------------------
+; Stack Pointer definition
+;-------------------------------------------------------------------------------
+            .global __STACK_END
+            .sect   .stack
+            
+;-------------------------------------------------------------------------------
+; Interrupt Vectors
+;-------------------------------------------------------------------------------
+            .sect   ".reset"                ; MSP430 RESET Vector
+            .short  RESET
+            
