@@ -9,7 +9,7 @@ Group Members:
 - [Fatih Baskın](https://github.com/fthbaskin)
 - [Mehmet Eymen Ünay](https://github.com/Eymay)
 - Nada Malek
-- Rojen Arda Şeşen
+- [Rojen Arda Şeşen](https://github.com/rojenarda)
 
 | Number | Experiment Name | Description |
 | :----: | :-------------- | :---------- |
