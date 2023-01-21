@@ -11,8 +11,8 @@ Group Members:
 - Nada Malek
 - Rojen Arda Şeşen
 
-| No: | Experiment Name | Description |
-| --- | :-------------- | :---------- |
+| Number | Experiment Name | Description |
+| :----: | :-------------- | :---------- |
 | 1 | Basic Assembly Coding        | We are asked to light several LEDs in a pattern using GPIO ports. |
 | 2 | General Purpose Input Output | We are asked to change lighting LED with a push of a button and a counter for how many times that button is pressed. |
 | 3 | Advanced Assembly Coding     | We are asked to implement a subroutine for modulo operation using Russian Peasant Division and to implement a hashmap using that subroutine. |
