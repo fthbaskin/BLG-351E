@@ -17,7 +17,7 @@ Group Members:
 | 2 | General Purpose Input Output               | We are asked to change lighting LED with a push of a button and a counter for how many times that button is pressed. |
 | 3 | Advanced Assembly Coding                   | We are asked to implement a subroutine for modulo operation using Russian Peasant Division and to implement a hashmap using that subroutine. |
 | 4 | Stack and Subrotouine                      | We are asked to implement several subroutines and functions using the stack and to merge them to create a complex program. |
-| 5 | 7-Segment Display and Interrupt Subroutine | We are asked to implement even-counter and odd-counter using 7-Segment Display and our program to be able to change counting mode when a button is pressed using interrupt subroutines. |
-| 6 | Advanced Assembly Coding     | We are asked to implement a subroutine for modulo operation using Russian Peasant Division and to implement a hashmap using that subroutine. |
+| 5 | 7-Segment Display and Interrupt Subroutine | We are asked to implement even-counter and odd-counter using 7-segment display and for our program to be able to change counting mode when a button is pressed using interrupt subroutines. |
+| 6 | Playing with Time                          | We are asked to implement a timer with start-stop and save best time features using interrupt subroutines and 7-segment display. |
 | 7 | Basic Assembly Coding        | We are asked to light several LEDs in a pattern using GPIO ports. |
 | 8 | General Purpose Input Output | We are asked to change lighting LED with a push of a button and a counter for how many times that button is pressed. |
