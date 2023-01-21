@@ -1,0 +1,236 @@
+;Group 11 - Wednesday
+;-------------------------------------------------------------------------------
+; MSP430 Assembler Code Template for use with TI Code Composer Studio
+;
+;
+;-------------------------------------------------------------------------------
+            .cdecls C,LIST,"msp430.h"       ; Include device header file
+
+;-------------------------------------------------------------------------------
+            .def    RESET                   ; Export program entry-point to
+                                            ; make it known to linker.
+;-------------------------------------------------------------------------------
+            .text                           ; Assemble into program memory.
+            .retain                         ; Override ELF conditional linking
+                                            ; and retain current section.
+            .retainrefs                     ; And retain any sections that have
+                                            ; references to current section.
+
+;-------------------------------------------------------------------------------
+RESET       mov.w   #__STACK_END,SP         ; Initialize stackpointer
+StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL  ; Stop watchdog timer
+
+FUNCX	 .macro func1, arg1, arg2
+		  call #SCRATCH_PUSH ;
+		  push arg2;
+		  push arg1;
+          call func1
+          call #SCRATCH_POP ;
+          .endm
+
+;-------------------------------------------------------------------------------
+; Main loop here
+;-------------------------------------------------------------------------------
+; Using R4-R7 as scratch registers, R15 as return address register
+; Pass parameters number, modulo, so pop modulo then number
+; Using R14 for function returns
+
+
+INIT_INT		bis.b 	#020h, &P2IE ; 0010 0000 -> 20h
+				and.b	#0DFh, &P2SEL ; 1101 1111 -> dfh
+				and.b	#0DFh, &P2SEL2
+				bis.b	#020h, &P2IES ; 0010 0000
+				clr		&P2IFG
+				eint
+
+
+SETUP			bis.b 	#0FFh,&P1DIR ; setting p1dir 1111 1111
+				bis.b	#00Fh,&P2DIR ; setting p2dir 0000 1111
+				jmp MAIN
+
+
+MODULO			pop.w R15 ; pop return address
+				pop.w R5 ; pop modulo
+				pop.w R4 ; pop number
+				mov.w R5, R6 ; copy modulo for divisor
+				jmp MODULO_L1_1 ; while loop that sets copy of divisor
+MODULO_L1_2		clrc ; clear carry
+				rla R6; rotate copy of modulo
+MODULO_L1_1		cmp R6, R4; while(R4 >= R6) dest - source, while(number >= copy)
+				jhs MODULO_L1_2 ; if comparison yields positive jump to body
+				clrc ; clear carry
+				rra R6 ; there will be one extra shift correcting that
+				jmp MODULO_L2_1 ; while loop that subtracts from number
+MODULO_L2_2	    cmp R6, R4; if(R4 => R6) dest - source, if(number >= copy)
+				jn MODULO_IF1_1 ; if comparison yields negative, don't execute code below
+				sub.w R6, R4 ; R4 - R6, subtract divisor(copy) from number
+MODULO_IF1_1	clrc ; clear carry
+				rra R6 ; divide divisor by two
+MODULO_L2_1		cmp R5, R4; while(R4 => R5) dest - source, while(number >= modulo)
+				jhs MODULO_L2_2 ; if positive jump to code
+				push R4 ; return modulo
+				push R15 ; push return address
+				ret ; return
+
+
+LOOPTIPLY		pop.w R15 ; pop return address
+				pop.w R5 ; pop a
+				pop.w R4 ; pop b
+				clr.w R6 ; clear R6
+LOOPTIPLY_L		dec.w R5  ; decrement R5 until it gets to 0
+				jn	LOOPTIPLY_R ; if reached 0 get out of loop
+				add.w R4, R6 ; add R4 tp R6
+				jmp LOOPTIPLY_L ; jump back to loop
+LOOPTIPLY_R		push R6 ; return result
+				push R15 ; return address
+				ret ; return
+
+
+LOOPDIVIDE		pop.w R15 ; pop return address
+				pop.w R5 ; divisor
+				pop.w R4 ; dividend
+				clr.w R6 ; clear r6
+LOOPDIVIDE_L	sub.w R5, R4 ; R4 - R5, subtract divisor from divident
+				jn LOOPDIVIDE_R ; if negative, jump to return
+				inc R6 ; if positive, increment r6
+				jmp LOOPDIVIDE_L
+LOOPDIVIDE_R	push R6 ; R6, result counter
+				push R15 ; return address
+				ret ; return
+
+
+SCRATCH_PUSH	pop.w R15 ; return address
+				push.w R4 ; push r4
+				push.w R5 ; push r5
+				push.w R6 ; push r6
+				push.w R7 ; push r7
+				push.w R15 ; return address
+				ret
+
+
+SCRATCH_POP		pop.w R15 ; return address
+				pop.w R7 ; pop r7
+				pop.w R6 ; pop r6
+				pop.w R5 ; pop r5
+				pop.w R4 ; pop r4
+				push.w R15 ; return address
+				ret
+
+
+PRINT			pop.w R15 ; pop return address
+				pop.w R4 ; number which will be printed
+				mov.w #0Ah, R5 ; taking mod by 10
+				mov.w #08h, R7 ; location which LCD should be printed
+PRINT_L			cmp #00h, R7 ; writing to lcd segments 3 (08h) 2(04h) 1(02h) 0(01h) respectively
+				jeq PRINT_R
+				push R15
+				call #SCRATCH_PUSH ; storing scratch registers (we want to use them after calling subroutine)
+				push.w R4 ; parameter for modulo
+				push.w R5 ; parameter for modulo
+				call #MODULO
+				pop.w R14 ; return values go to R14
+				call #SCRATCH_POP ; restore scratch registers
+				pop R15
+				mov.w R14, R6 ; moving modulo result to R6;
+				push R15
+				call #SCRATCH_PUSH ; storing scratch registers (we want to use them after calling subroutine)
+				push.w R6 ; parameter for LCD function
+				push.w R7 ; parameter for LCD function
+				call #LCD ; call lcd to print things
+				call #SCRATCH_POP ; restore scratch registers
+				pop R15
+				push R15
+				call #SCRATCH_PUSH ; storing scratch registers (we want to use them after calling subroutine)
+				push.w R4 ; parameter for division
+				push.w R5 ; parameter for division
+				call #LOOPDIVIDE
+				pop.w R14 ; get result
+				call #SCRATCH_POP ; restore scratch registers
+				pop R15
+				mov.w R14, R4 ; our new number is number / 10
+				clrc ; clear carry
+				rra.w R7 ; divide r7 by 2
+				jmp PRINT_L ; jumping to loop
+PRINT_R			push.w R15 ; return address
+				ret ; return
+
+
+LCD 			pop.w R15 ; pop return address
+				pop.w R5 ; popping lcd segment
+				pop.w R4 ; popping number
+				mov.w #array, R6 ; address of array to R6
+				add.w R4, R6 ; indexing R6
+				mov.b #00h, &P2OUT; to not override next lcd
+				mov.b R5, &P2OUT ; LCD segment
+				mov.b @R6, &P1OUT ; LCD number
+				push.w R15 ; return address
+				ret ; return
+
+
+MAIN			mov.w #000h, R8 ; x
+				mov.w #000h, R9 ; w
+				mov.w #001h, R10 ; s
+				clr.w R11 ; random
+				mov.w #01h, R12 ; flag
+MAINLOOP		cmp.b #01h, R12
+				jne MANINPRINT
+				push R8 ; x
+				push R8 ; x
+				call #LOOPTIPLY ; result is in stack
+				pop R8 ; x = x * x
+				add.w R10, R9; w = w + s
+				add.w R9, R8 ; x = x + w
+				mov.w R8, R4 ; copy x
+				clrc
+				rra R4
+				clrc
+				rra R4
+				clrc
+				rra R4
+				clrc
+				rra R4 ; right shift 4 times
+				mov.w R8, R5 ; copy x
+				clrc
+				rla R5
+				clrc
+				rla R5
+				clrc
+				rla R5
+				clrc
+				rla R5 ; left shift 4 times
+				mov.w R4, R11 ; right shift value
+				bis.b R5, R11 ; or with left shift value
+				push R11; to mod rand
+				push #080h; 128
+				call #MODULO
+				pop R11 ; return modulo
+				clr R12
+MANINPRINT		push R11
+				call #PRINT
+				jmp MAINLOOP
+
+
+ISR				dint
+				mov.w #01h, R12
+				eint
+				clr &P2IFG ; might be necessary
+				reti
+
+
+			.data
+array .byte 00111111b , 00000110b , 01011011b , 01001111b , 01100110b , 01101101b , 01111101b , 00000111b , 01111111b , 01101111b
+lastElement
+
+;-------------------------------------------------------------------------------
+; Stack Pointer definition
+;-------------------------------------------------------------------------------
+            .global __STACK_END
+            .sect   .stack
+
+;-------------------------------------------------------------------------------
+; Interrupt Vectors
+;-------------------------------------------------------------------------------
+            .sect   ".reset"                ; MSP430 RESET Vector
+            .short  RESET
+			.sect  ".int03" ;interrupt service routine
+			.short	ISR
