@@ -6,7 +6,7 @@ In this laboratory lecture, there are eight experiments, we are asked to impleme
 Several assembly code are in asm format, several of them are in txt format.
 
 Group Members:
-- Fatih Baskın
-- Mehmet Eymen Ünay
+- [Fatih Baskın](https://github.com/fthbaskin)
+- [Mehmet Eymen Ünay](https://github.com/Eymay)
 - Nada Malek
 - Rojen Arda Şeşen
