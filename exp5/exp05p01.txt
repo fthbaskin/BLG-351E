@@ -1,0 +1,68 @@
+; Group 11 Wednesday
+
+;-------------------------------------------------------------------------------
+; MSP430 Assembler Code Template for use with TI Code Composer Studio
+;
+;
+;-------------------------------------------------------------------------------
+            .cdecls C,LIST,"msp430.h"       ; Include device header file
+            
+;-------------------------------------------------------------------------------
+            .def    RESET                   ; Export program entry-point to
+                                            ; make it known to linker.
+;-------------------------------------------------------------------------------
+			.data
+array		.byte	0111111b, 0000110b, 1011011b, 1001111b, 1100110b, 1101101b, 1111101b, 0000111b, 11111111b, 1101111b
+lastElement
+;-------------------------------------------------------------------------------
+            .text                           ; Assemble into program memory.
+            .retain                         ; Override ELF conditional linking
+                                            ; and retain current section.
+            .retainrefs                     ; And retain any sections that have
+                                            ; references to current section.
+
+;-------------------------------------------------------------------------------
+RESET       mov.w   #__STACK_END,SP         ; Initialize stackpointer
+StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL  ; Stop watchdog timer
+
+
+;-------------------------------------------------------------------------------
+; Main loop here
+;-------------------------------------------------------------------------------
+
+SetupP1 	bis.b 	#0FFh,&P1DIR
+			bis.b	#008h,&P2DIR
+			bis.b	#008h,&P2OUT
+			mov.w	#000h, R13
+			mov.w	#array, R12
+
+Mainloop 	add.w	counter, R12
+			mov.w	0(R12), &P1OUT
+			mov.w	#array, R12
+			call 	#Delay
+			inc.w	R13
+			cmp.w	#0Ah, R13
+			jnz		Mainloop
+			jmp 	SetupP1
+
+Delay		mov.w	#0Ah, R14
+L2			mov.w	#07A00h, R15
+L1			dec.w	R15
+			jnz		L1
+			dec.w	R14
+			jnz		L2
+			ret
+exit		nop
+;-------------------------------------------------------------------------------
+; Stack Pointer definition
+;-------------------------------------------------------------------------------
+            .global __STACK_END
+            .sect   .stack
+            
+;-------------------------------------------------------------------------------
+; Interrupt Vectors
+;-------------------------------------------------------------------------------
+            .sect   ".reset"                ; MSP430 RESET Vector
+            .short  RESET
+            
+
