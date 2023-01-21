@@ -13,3 +13,4 @@ Group Members:
 
 | Experiment Number | Experiment Name | Description |
 | :---------------: | :-------------- | :---------- |
+| 1 | Basic Assembly Coding | We are asked to light several LEDs in a pattern using GPIO ports. |
