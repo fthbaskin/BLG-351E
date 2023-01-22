@@ -8,7 +8,7 @@ Several assembly code are in asm format, several of them are in txt format.
 Group Members:
 - [Fatih Baskın](https://github.com/fthbaskin)
 - [Mehmet Eymen Ünay](https://github.com/Eymay)
-- Nada Malek
+- [Nada Malek](https://github.com/nadm99-eng)
 - [Rojen Arda Şeşen](https://github.com/rojenarda)
 
 | Number | Experiment Name | Description |
